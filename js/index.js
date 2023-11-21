@@ -56,31 +56,33 @@ function creaTaulell() {
 
 // mètode per obrir les caselles
 function obreCasella(x, y) {
-    // TODO
     if (esMina(x, y)) { 
        mostraMines();
     } else {
-        let adjacents =  document.getElementById(`td${x}-${y}`).getAttribute("data-mines-adjacents");
-        document.getElementById(`td${x}-${y}`).setAttribute("data-state", "open");
+        let adjacents =  document.getElementById(`td${x}-${y}`).dataset.minesAdjacents;
+        document.getElementById(`td${x}-${y}`).dataset.state = "open";
         if (adjacents == 0) {
             mostraAdjacents(x, y);
         } else {
             document.getElementById(`td${x}-${y}`).innerHTML = adjacents;
         }
+        if (comprovaSiGuanya()) {
+            alert('Has guanyat!');
+        }
     }
 }
 // activa aleatoriament un 17% de les mines
 function setMines() {
-    for (let i=0; i<files; i++) {
-        for (let j=0; j<cols; j++) {
-            let random = Math.round(Math.random()*100);
-            if (random <= 17) { document.getElementById(`td${i}-${j}`).setAttribute("data-mina", "true"); }
-        }
+    let numMines = Math.round(files*cols*0.17);
+    while (numMines > 0) {
+        let td = document.getElementById(`td${Math.floor(Math.random()*files)}-${Math.floor(Math.random()*cols)}`);
+        if (td.dataset.mina == "true") { continue; } // si la mina ja ha sigut assignada, fem continue per buscar una que no
+        td.dataset.mina = "true";
+        numMines--;
     }
 }
 // funció que recorrerà el taulell i apuntarà el número de mines adjacents de cada casella en una custom html property data-num-mines inicialment a cero.
 function calculaAdjacents() {
-    // TODO:
     let quantesMines = 0;
     for (let i=0; i<files; i++){
         for (let j=0; j<cols; j++) {
@@ -88,7 +90,7 @@ function calculaAdjacents() {
                 for(let col=j-1; col<=j+1; col++) {
                     let check = document.getElementById(`td${row}-${col}`);
                     if (check) {
-                        if (check.getAttribute("data-mina") == "true") { quantesMines++; }
+                        if (check.dataset.mina == "true") { quantesMines++; }
                     }
                 }
             }
@@ -99,12 +101,10 @@ function calculaAdjacents() {
 }
 // funció que estableix a la casella de posició x,y l’atribut del número de mines a nMinesAdjacents
 function setMinesAdjacents(x, y, nMinesAdjacents) {
-    // TODO:
-    document.getElementById(`td${x}-${y}`).setAttribute("data-mines-adjacents", nMinesAdjacents);       
+    document.getElementById(`td${x}-${y}`).dataset.minesAdjacents = nMinesAdjacents;       
 }
 // funció que torna un boleà de si la posició x,y hi ha una mina
 function esMina(x, y) {
-    // TODO:
     let mina = document.getElementById(`td${x}-${y}`);
     if (mina.dataset.mina == "true") { return true; }
     return false;
@@ -113,11 +113,16 @@ function mostraMines() {
     for (let i=0; i<files; i++){
         for (let j=0; j<cols; j++) {
             if (esMina(i, j)) { 
-                document.getElementById(`img${i}-${j}`).src = "img/mina20px.jpg"; 
+                document.getElementById(`img${i}-${j}`).src = "img/mina20px.jpg";
             }
         }
-    } 
+    }
+    
+    alert('Has mort!'); 
+    disableOnclick(); 
 }
+// funció que mostra les mines adjacents i mostra el nombre que hi ha
+// si es 0 desbloca les caselles adjacents i segueix fent-ho sempre i quan siguin 0 (recursiu)
 function mostraAdjacents(x, y) {
     for (let i=x-1; i<=x+1; i++) {
         for(let j=y-1; j<=y+1; j++) {
@@ -125,7 +130,7 @@ function mostraAdjacents(x, y) {
             if (casella) {
                 if (casella.dataset.minesAdjacents == 0 && casella.dataset.state != "open") {
                     casella.innerHTML = casella.dataset.minesAdjacents;
-                    casella.setAttribute("data-state", "open");
+                    casella.dataset.state = "open";
                     mostraAdjacents(i, j);
                 } else {
                     casella.innerHTML = casella.dataset.minesAdjacents;
@@ -133,4 +138,32 @@ function mostraAdjacents(x, y) {
             }
         }
     }
+}
+// funció que deshabilita el primer onclick assignat
+// assigna un nou onclick que mostra un alert conforme el jugador ha perdut
+function disableOnclick() {
+    for (let i=0; i<files; i++){
+        for (let j=0; j<cols; j++) {
+            let img = document.getElementById(`img${i}-${j}`);
+            if (img) {
+                img.setAttribute("onclick", "hasMort()");
+            }
+        }
+    }
+}
+// funció que mostra un alert indican que el jugador ha perdut
+function hasMort() {
+    alert('Has mort! Per jugar inicia una nova partida');
+}
+// funció que comprova la data del taulell per saber si el jugador ha guanyat
+function comprovaSiGuanya() {
+    for (let i=0; i<files; i++){
+        for (let j=0; j<cols; j++) {
+            let td = document.getElementById(`td${i}-${j}`);
+            if (td.dataset.state != "obert" && td.dataset.mina == "false") {
+                return false;
+            }
+        }
+    }
+    return true;
 }
