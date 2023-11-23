@@ -1,5 +1,8 @@
 let files = 10;
 let cols = 10;
+let bandera = "img/badera20px.jpg";
+let fons = "img/fons20px.jpg";
+let haGuanyat = false;
 function iniciarPartida() {
     // demanem les files i les columnes
     let valorFiles = parseInt(prompt("Introdueix les files (min. 10)"));
@@ -46,6 +49,7 @@ function creaTaulell() {
             img.id = `img${i}-${j}`;
             img.src="img/fons20px.jpg";
             img.setAttribute("onclick", `obreCasella(${i}, ${j})`);
+            img.setAttribute("oncontextmenu", `setBandera(${i}, ${j})`);
             td.appendChild(img);
             tr.appendChild(td);
         }
@@ -58,6 +62,9 @@ function creaTaulell() {
 function obreCasella(x, y) {
     if (esMina(x, y)) { 
        mostraMines();
+       haGuanyat = false;
+       alert('Has mort!'); 
+       disableOnclick(); 
     } else {
         let adjacents =  document.getElementById(`td${x}-${y}`).dataset.minesAdjacents;
         document.getElementById(`td${x}-${y}`).dataset.state = "open";
@@ -67,6 +74,8 @@ function obreCasella(x, y) {
             document.getElementById(`td${x}-${y}`).innerHTML = adjacents;
         }
         if (comprovaSiGuanya()) {
+            mostraMines();
+            haGuanyat = true;
             alert('Has guanyat!');
         }
     }
@@ -117,9 +126,6 @@ function mostraMines() {
             }
         }
     }
-    
-    alert('Has mort!'); 
-    disableOnclick(); 
 }
 // funció que mostra les mines adjacents i mostra el nombre que hi ha
 // si es 0 desbloca les caselles adjacents i segueix fent-ho sempre i quan siguin 0 (recursiu)
@@ -133,6 +139,7 @@ function mostraAdjacents(x, y) {
                     casella.dataset.state = "open";
                     mostraAdjacents(i, j);
                 } else {
+                    casella.dataset.state = "open";
                     casella.innerHTML = casella.dataset.minesAdjacents;
                 }
             }
@@ -153,17 +160,26 @@ function disableOnclick() {
 }
 // funció que mostra un alert indican que el jugador ha perdut
 function hasMort() {
-    alert('Has mort! Per jugar inicia una nova partida');
+    alert('Has mort! Per jugar, inicia una nova partida');
 }
 // funció que comprova la data del taulell per saber si el jugador ha guanyat
 function comprovaSiGuanya() {
     for (let i=0; i<files; i++){
         for (let j=0; j<cols; j++) {
             let td = document.getElementById(`td${i}-${j}`);
-            if (td.dataset.state != "obert" && td.dataset.mina == "false") {
+            if (td.dataset.mina == "false" && td.dataset.state == undefined) {
                 return false;
             }
         }
     }
     return true;
+}
+
+function setBandera(x, y) {
+    let img = document.getElementById(`img${x}-${y}`);
+    if (img.src.includes(fons)) {
+        img.src = bandera;
+    } else {
+        img.src = fons;
+    }
 }
