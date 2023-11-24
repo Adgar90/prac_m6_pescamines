@@ -4,12 +4,12 @@ let bandera = "img/badera20px.jpg";
 let fons = "img/fons20px.jpg";
 let haGuanyat = false;
 function iniciarPartida() {
+    // reset
+    document.getElementById("taulell").innerHTML = "";
+    resetValors();
     // demanem les files i les columnes
     let valorFiles = parseInt(prompt("Introdueix les files (min. 10)"));
     let valorCols = parseInt(prompt("Introdueix les columnes (min. 10)"));
-    
-    // reset
-    document.getElementById("taulell").innerHTML = "";
     
     if (valorFiles >= 10 && valorFiles <= 30) {
         files = valorFiles;
@@ -64,7 +64,7 @@ function obreCasella(x, y) {
        mostraMines();
        haGuanyat = false;
        alert('Has mort!'); 
-       disableOnclick(); 
+       disableOnclick("hasMort()"); 
     } else {
         let adjacents =  document.getElementById(`td${x}-${y}`).dataset.minesAdjacents;
         document.getElementById(`td${x}-${y}`).dataset.state = "open";
@@ -77,6 +77,7 @@ function obreCasella(x, y) {
             mostraMines();
             haGuanyat = true;
             alert('Has guanyat!');
+            disableOnclick("hasGuanyat()"); 
         }
     }
 }
@@ -148,12 +149,12 @@ function mostraAdjacents(x, y) {
 }
 // funció que deshabilita el primer onclick assignat
 // assigna un nou onclick que mostra un alert conforme el jugador ha perdut
-function disableOnclick() {
+function disableOnclick(funcio) {
     for (let i=0; i<files; i++){
         for (let j=0; j<cols; j++) {
             let img = document.getElementById(`img${i}-${j}`);
             if (img) {
-                img.setAttribute("onclick", "hasMort()");
+                img.setAttribute("onclick", funcio);
             }
         }
     }
@@ -161,6 +162,9 @@ function disableOnclick() {
 // funció que mostra un alert indican que el jugador ha perdut
 function hasMort() {
     alert('Has mort! Per jugar, inicia una nova partida');
+}
+function hasGuanyat() {
+    alert('Has guanyat! Per jugar, inicia una nova partida');
 }
 // funció que comprova la data del taulell per saber si el jugador ha guanyat
 function comprovaSiGuanya() {
@@ -174,7 +178,7 @@ function comprovaSiGuanya() {
     }
     return true;
 }
-
+// funció que permet a l'usuari marcar amb un 'flag' la casella sense obrir-la
 function setBandera(x, y) {
     let img = document.getElementById(`img${x}-${y}`);
     if (img.src.includes(fons)) {
@@ -182,4 +186,9 @@ function setBandera(x, y) {
     } else {
         img.src = fons;
     }
+}
+// funcio que retorna les files i les cols a 10
+function resetValors() {
+    files = 10;
+    cols = 10;
 }
