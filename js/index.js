@@ -111,7 +111,8 @@ function calculaAdjacents() {
 }
 // funció que estableix a la casella de posició x,y l’atribut del número de mines a nMinesAdjacents
 function setMinesAdjacents(x, y, nMinesAdjacents) {
-    document.getElementById(`td${x}-${y}`).dataset.minesAdjacents = nMinesAdjacents;       
+    document.getElementById(`td${x}-${y}`).dataset.minesAdjacents = nMinesAdjacents;
+    setNumColor(document.getElementById(`td${x}-${y}`));
 }
 // funció que torna un boleà de si la posició x,y hi ha una mina
 function esMina(x, y) {
@@ -191,4 +192,34 @@ function setBandera(x, y) {
 function resetValors() {
     files = 10;
     cols = 10;
+}
+// funcio que seteja el color del nMinesAdjacents
+function setNumColor(td) {
+    let num = td.dataset.minesAdjacents;
+    switch (num) {
+        case "0":
+            td.style.color = "darkmagenta";
+            break;
+        case "1":
+            td.style.color = "blue";
+            break;
+        case "2":
+            td.style.color = "green";
+            break;
+        case "3":
+            td.style.color = "red";
+            break;
+        case "4":
+            td.style.color = "darkblue";
+            break;
+        case "5":
+            td.style.color = "forestgreen";
+            break;
+        case "6":
+            td.style.color = "indianred";
+            break;
+        case "7":
+            td.style.color = "violet";
+            break;
+    }
 }
