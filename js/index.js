@@ -3,6 +3,12 @@ let cols = 10;
 let bandera = "img/badera20px.jpg";
 let fons = "img/fons20px.jpg";
 let haGuanyat = false;
+
+let hores = 0;
+let minuts = 0;
+let segons = 0;
+let interval;
+let minesPartida = 0;
 function iniciarPartida() {
     // reset
     document.getElementById("taulell").innerHTML = "";
@@ -30,6 +36,9 @@ function iniciarPartida() {
     creaTaulell();
     setMines();
     calculaAdjacents();
+    contadorMines(minesPartida);
+    interval = setInterval(iniciaContador, 1000);
+    document.oncontextmenu = inhabilitar
 }
 
 function creaTaulell() {
@@ -64,7 +73,8 @@ function obreCasella(x, y) {
        mostraMines();
        haGuanyat = false;
        alert('Has mort!'); 
-       disableOnclick("hasMort()"); 
+       disableOnclick("hasMort()");
+       clearInterval(interval); 
     } else {
         let adjacents =  document.getElementById(`td${x}-${y}`).dataset.minesAdjacents;
         document.getElementById(`td${x}-${y}`).dataset.state = "open";
@@ -77,13 +87,15 @@ function obreCasella(x, y) {
             mostraMines();
             haGuanyat = true;
             alert('Has guanyat!');
-            disableOnclick("hasGuanyat()"); 
+            disableOnclick("hasGuanyat()");
+            clearInterval(interval);  
         }
     }
 }
 // activa aleatoriament un 17% de les mines
 function setMines() {
     let numMines = Math.round(files*cols*0.17);
+    minesPartida = numMines;
     while (numMines > 0) {
         let td = document.getElementById(`td${Math.floor(Math.random()*files)}-${Math.floor(Math.random()*cols)}`);
         if (td.dataset.mina == "true") { continue; } // si la mina ja ha sigut assignada, fem continue per buscar una que no
@@ -184,14 +196,24 @@ function setBandera(x, y) {
     let img = document.getElementById(`img${x}-${y}`);
     if (img.src.includes(fons)) {
         img.src = bandera;
+        minesPartida--;
+        contadorMines(minesPartida);
     } else {
         img.src = fons;
+        minesPartida++;
+        contadorMines(minesPartida);
     }
 }
 // funcio que retorna les files i les cols a 10
 function resetValors() {
+    if(interval) { clearInterval(interval); } // comprovem si està setejat l'interval per resetejar-ho
+    hores = 0;
+    minuts = 0;
+    segons = 0;
+    minesPartida = 0;
     files = 10;
     cols = 10;
+    
 }
 // funcio que seteja el color del nMinesAdjacents
 function setNumColor(td) {
@@ -223,3 +245,41 @@ function setNumColor(td) {
             break;
     }
 }
+
+// funció que ens permet setejar un interval per tal de crear un contador
+// aquest interval ens permetrà anar afegint +1 per cada segon que passa i mostrar-ho
+function iniciaContador() {
+    /* lògica per comprovar el timer i evaluar si hem de mostrar hores, minuts, segons */
+    if (segons > 59) { segons = 0; minuts++; }
+    if (minuts > 59) { minuts = 0; hores++; }
+    if (hores > 23) { 
+        segons = 0;
+        minuts = 0;
+        hores = 0;
+    }
+    document.getElementById("contador").innerHTML = mostraTimer();
+    segons++;
+}
+
+//funció per mostrar com a string concatenat en format 00:00:00
+function mostraTimer() {
+    let h = hores < 10 ? `0${hores}` : hores;
+    let m = minuts < 10 ? `0${minuts}` : minuts;
+    let s = segons < 10 ? `0${segons}` : segons;
+    return `${h}:${m}:${s}`;
+}
+
+// funció que mostra el nombre de mines que hi ha al taulell
+function contadorMines(nMines) {
+    let div = document.getElementById("numMines");
+    div.innerHTML = nMines > 0 ? nMines : 0;
+    let img = document.createElement("img");
+    img.src = "img/mina20px.jpg";
+    div.appendChild(img);
+}
+
+// funció que ens deshabilita el menu contextual dins del nostre pescamines per poder fer servir ambdós botons sense problemes
+function inhabilitar(e) {
+    e.preventDefault();
+  }
+        
